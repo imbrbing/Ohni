@@ -13,16 +13,21 @@ def is_json(myjson):
       try:
           json_object = json.load(f)
       except ValueError as e:
-          print('INVALID JSON: %s' % e)
+          print('\t INVALID JSON: %s' % e)
           return False
       return json_object
 
 def validate_eth_address(eth_addr):
-     print("VALIDATING ETHEREUM ADDRESS:  %s" % eth_addr)
+     E_address = eth_addr
+     E_address.strip()
+     print("VALIDATING ETHEREUM ADDRESS:  %s" % E_address)
      w3 = Web3(HTTPProvider('https://api.myetherapi.com/eth'))
-     eth_balance = w3.eth.getBalance(eth_addr)
-     print("Balance = :  %s" % eth_balance)
-     
+     try:
+         eth_balance = w3.eth.getBalance(E_address)
+         print("Balance = :  %s" % eth_balance)
+     except ValueError as e:
+         print('\t INVALID ADDRESS: %s' % e)
+         
 
 def validate_definition(description):
      print ("VALIDATING DEFINITION: %s " % description)
@@ -38,19 +43,26 @@ def validate_links(links):
         req = urllib.request.Request(v)
         try: 
               if urllib.request.urlopen(req):
-                   print (v,  ": IS OK")
+                   print ('\t', v,  ": IS OK")
         except urllib.error.URLError as e:
               print(v, e.reason)   
              
-        #print(v)
-
 def main():
   if len(sys.argv) == 2:
       result = is_json(sys.argv[1])
       if (result):
-          validate_eth_address(result['address'])
-          validate_definition(result['description'])
-          validate_links(result['links'])
+          if 'address' in result:
+             validate_eth_address(result['address'])
+          else:
+             print ("No Address found")
+          if 'description' in result:
+             validate_definition(result['description'])
+          else:
+             print ("\t No Description found")
+          if 'links' in result:
+             validate_links(result['links'])
+          else:
+             print("No links found")
       else:
           print("##############################")
           print("# Json check FAILED")
