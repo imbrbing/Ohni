@@ -1,0 +1,62 @@
+import json
+import ssl
+import urllib.request
+import sys
+from utils import *
+from web3 import Web3, HTTPProvider
+import http.client
+
+
+def is_json(myjson):
+  with open(myjson) as f:
+      print ("VALIDATING JSON %s" % myjson)
+      try:
+          json_object = json.load(f)
+      except ValueError as e:
+          print('INVALID JSON: %s' % e)
+          return False
+      return json_object
+
+def validate_eth_address(eth_addr):
+     print("VALIDATING ETHEREUM ADDRESS:  %s" % eth_addr)
+     w3 = Web3(HTTPProvider('https://api.myetherapi.com/eth'))
+     eth_balance = w3.eth.getBalance(eth_addr)
+     print("Balance = :  %s" % eth_balance)
+     
+
+def validate_definition(description):
+     print ("VALIDATING DEFINITION: %s " % description)
+     length = len(description)
+     if (length  > 1000):
+        print("error, string length is %s" % len(description))    
+        return False
+
+def validate_links(links):
+     ssl._create_default_https_context = ssl._create_unverified_context
+     print ("VALIDATING  LINKS:")
+     for k, v  in links.items():
+        req = urllib.request.Request(v)
+        try: 
+              urllib.request.urlopen(req)
+        except urllib.error.URLError as e:
+              print(v, e.reason)   
+             
+        #print(v)
+
+def main():
+  if len(sys.argv) == 2:
+      result = is_json(sys.argv[1])
+      if (result):
+          validate_eth_address(result['address'])
+          validate_definition(result['description'])
+          validate_links(result['links'])
+      else:
+          print("##############################")
+          print("# Json check FAILED")
+          print("##############################")   
+  else:
+      print("Usage: validateJson.py filename.json")
+
+if __name__ == '__main__':
+    main()
+exit(1)
