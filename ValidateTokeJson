@@ -37,7 +37,8 @@ def validate_links(links):
      for k, v  in links.items():
         req = urllib.request.Request(v)
         try: 
-              urllib.request.urlopen(req)
+              if urllib.request.urlopen(req):
+                   print (v,  ": IS OK")
         except urllib.error.URLError as e:
               print(v, e.reason)   
              
